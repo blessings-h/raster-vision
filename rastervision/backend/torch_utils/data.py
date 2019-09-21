@@ -11,6 +11,7 @@ import torchvision
 
 from rastervision.utils.files import (file_to_json)
 from rastervision.backend.torch_utils.boxlist import BoxList
+from albumentations.pytorch import ToTensor
 
 from albumentations import (
     HorizontalFlip,
@@ -116,7 +117,7 @@ def build_databunch(data_dir, img_sz, batch_sz):
 
     label_names = get_label_names(train_anns[0])
     aug_transforms = [HorizontalFlip(),
-                      ShiftScaleRotate(shift_limit=0.1, scale_limit=0.3, rotate_limit=0, p=0.8),
+                      ShiftScaleRotate(shift_limit=0.1, scale_limit=0.3, rotate_limit=0, border_mode=cv2.BORDER_CONSTANT, p=0.8),
                       Equalize(p=0.8),
                       RandomContrast()
                      ]
