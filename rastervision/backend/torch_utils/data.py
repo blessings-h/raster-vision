@@ -16,7 +16,10 @@ from albumentations import (
     HorizontalFlip,
     Equalize,
     ShiftScaleRotate, 
-    RandomContrast
+    RandomContrast,
+    Compose,
+    Resize,
+    BboxParams
 )
 
 
@@ -34,53 +37,6 @@ class DataBunch():
         rep += 'valid_ds: {} items\n'.format(len(self.valid_ds))
         rep += 'label_names: ' + ','.join(self.label_names)
         return rep
-
-
-class ToTensor(object):
-    def __init__(self):
-        self.to_tensor = torchvision.transforms.ToTensor()
-
-    def __call__(self, x, y):
-        return (self.to_tensor(x), y)
-
-
-class ScaleTransform(object):
-    def __init__(self, height, width):
-        self.height = height
-        self.width = width
-
-    def __call__(self, x, y):
-        yscale = self.height / x.shape[1]
-        xscale = self.width / x.shape[2]
-        x = F.interpolate(
-            x.unsqueeze(0), size=(self.height, self.width), mode='bilinear')[0]
-        return (x, y.scale(yscale, xscale))
-
-
-class RandomHorizontalFlip(object):
-    def __init__(self, prob=0.5):
-        self.prob = prob
-
-    def __call__(self, x, y):
-        if random.random() < self.prob:
-            height, width = x.shape[-2:]
-            x = x.flip(-1)
-
-            boxes = y.boxes
-            boxes[:, [1, 3]] = width - boxes[:, [3, 1]]
-            y.boxes = boxes
-
-        return (x, y)
-
-
-class ComposeTransforms(object):
-    def __init__(self, transforms):
-        self.transforms = transforms
-
-    def __call__(self, x, y):
-        for t in self.transforms:
-            x, y = t(x, y)
-        return x, y
 
 
 def collate_fn(data):
@@ -159,17 +115,18 @@ def build_databunch(data_dir, img_sz, batch_sz):
     valid_anns = glob.glob(join(valid_dir, '*.json'))
 
     label_names = get_label_names(train_anns[0])
-    aug_transforms = ComposeTransforms(
-        [ToTensor(),
-         ScaleTransform(img_sz, img_sz),
-         RandomHorizontalFlip(),
-         ShiftScaleRotate(shift_limit=0.1, scale_limit=0.3, rotate_limit=0, border_mode=cv2.BORDER_CONSTANT, p=0.8), 
-         Equalize(p=0.8),
-         RandomContrast()
-        ])
-    transforms = ComposeTransforms(
-        [ToTensor(), ScaleTransform(img_sz, img_sz)])
-
+    aug_transforms = [RandomHorizontalFlip(),
+                      ShiftScaleRotate(shift_limit=0.1, scale_limit=0.3, rotate_limit=0, border_mode=cv2.BORDER_CONSTANT, p=0.8),
+                      Equalize(p=0.8),
+                      RandomContrast()
+                     ]
+    transforms = [Resize(img_sz, img_sz), ToTensor()]
+    aug_transforms.extend(transforms)
+    
+    bbox_params = BboxParams(format='coco', min_area=0., min_visibility=0.2, label_fields=['labels'])
+    aug_transforms = Compose(aug_transforms, bbox_params=bbox_params)
+    transforms = Compose(basic_transforms, bbox_params=bbox_params)
+    
     train_ds = CocoDataset(train_dir, train_anns, transforms=aug_transforms)
     valid_ds = CocoDataset(valid_dir, valid_anns, transforms=transforms)
     train_ds.label_names = label_names
