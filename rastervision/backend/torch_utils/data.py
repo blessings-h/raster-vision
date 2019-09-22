@@ -91,8 +91,14 @@ class CocoDataset(Dataset):
         img_fn = self.imgs[ind]
         img_id = self.img2id[img_fn]
         img = np.array(Image.open(join(self.img_dir, img_fn)))
-        boxes, labels = self.id2boxes[img_id], self.id2labels[img_id]
-        if self.transforms:
+        
+        if img_id in self.id2boxes:
+            boxes, labels = self.id2boxes[img_id], self.id2labels[img_id]
+        else:
+            boxlist = BoxList(
+                torch.empty((0, 4)), labels=torch.empty((0, )).long())
+        
+        if self.transforms and len(boxes) > 0:
             out = self.transforms(image=img, bboxes=boxes, labels=labels)
             img = out['image']
             boxes = torch.tensor(out['bboxes'])
