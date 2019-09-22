@@ -114,6 +114,7 @@ then
         -v "${HOME}"/.rastervision:/root/.rastervision \
         -v ${REPO_ROOT}:/opt/src \
         -v ${RASTER_VISION_DATA_DIR}:/opt/data \
+        -v ~/Cedar_Project/code:/opt/src/code \
         ${TENSORBOARD} ${AWS} ${JUPYTER} ${DOCS} ${DEBUG} \
         ${IMAGE} "${CMD[@]}"
 fi
