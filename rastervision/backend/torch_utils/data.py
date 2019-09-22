@@ -92,6 +92,9 @@ class CocoDataset(Dataset):
         img_id = self.img2id[img_fn]
         img = np.array(Image.open(join(self.img_dir, img_fn)))
         
+        boxes = []
+        labels = []
+        
         if img_id in self.id2boxes:
             boxes, labels = self.id2boxes[img_id], self.id2labels[img_id]
         else:
@@ -144,7 +147,7 @@ def build_databunch(data_dir, img_sz, batch_sz):
     transforms = [Resize(img_sz, img_sz), ToTensor()]
     aug_transforms.extend(transforms)
     
-    bbox_params = BboxParams(format='coco', min_area=0., min_visibility=0.2, label_fields=['annotations'])
+    bbox_params = BboxParams(format='coco', min_area=0., min_visibility=0.2, label_fields=['labels'])
     aug_transforms = Compose(aug_transforms, bbox_params=bbox_params)
     transforms = Compose(transforms, bbox_params=bbox_params)
     
