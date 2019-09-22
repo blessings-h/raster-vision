@@ -98,7 +98,7 @@ class CocoDataset(Dataset):
             boxlist = BoxList(
                 torch.empty((0, 4)), labels=torch.empty((0, )).long())
         
-        if self.transforms and len(boxes) > 0:
+        if self.transforms:
             out = self.transforms(image=img, bboxes=boxes, labels=labels)
             img = out['image']
             boxes = torch.tensor(out['bboxes'])
@@ -144,7 +144,7 @@ def build_databunch(data_dir, img_sz, batch_sz):
     transforms = [Resize(img_sz, img_sz), ToTensor()]
     aug_transforms.extend(transforms)
     
-    bbox_params = BboxParams(format='coco', min_area=0., min_visibility=0.2, label_fields=['labels'])
+    bbox_params = BboxParams(format='coco', min_area=0., min_visibility=0.2, label_fields=['annotations'])
     aug_transforms = Compose(aug_transforms, bbox_params=bbox_params)
     transforms = Compose(transforms, bbox_params=bbox_params)
     
