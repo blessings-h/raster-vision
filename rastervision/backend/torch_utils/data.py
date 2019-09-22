@@ -5,7 +5,7 @@ import glob
 
 from PIL import Image
 import torch
-import numpy
+import numpy as np
 from torch.utils.data import Dataset, DataLoader, Subset
 import torch.nn.functional as F
 import torchvision
@@ -26,8 +26,6 @@ from albumentations import (
 )
 
 from albumentations.pytorch import ToTensor
-
-
 
 class DataBunch():
     def __init__(self, train_ds, train_dl, valid_ds, valid_dl, label_names):
@@ -152,13 +150,11 @@ def build_databunch(data_dir, img_sz, batch_sz):
     train_dl = DataLoader(
         train_ds,
         shuffle=True,
-        collate_fn=collate_fn,
         batch_size=batch_sz,
         num_workers=num_workers,
         pin_memory=True)
     valid_dl = DataLoader(
         valid_ds,
-        collate_fn=collate_fn,
         batch_size=batch_sz,
         num_workers=num_workers,
         pin_memory=True)
