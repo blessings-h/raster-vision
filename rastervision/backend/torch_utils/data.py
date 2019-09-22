@@ -5,9 +5,11 @@ import glob
 
 from PIL import Image
 import torch
-from torch.utils.data import Dataset, DataLoader
+import numpy
+from torch.utils.data import Dataset, DataLoader, Subset
 import torch.nn.functional as F
 import torchvision
+import cv2
 
 from rastervision.utils.files import (file_to_json)
 from rastervision.backend.torch_utils.boxlist import BoxList
@@ -23,6 +25,9 @@ from albumentations import (
     BboxParams
 )
 
+from albumentations.pytorch import ToTensor
+
+
 
 class DataBunch():
     def __init__(self, train_ds, train_dl, valid_ds, valid_dl, label_names):
@@ -34,8 +39,12 @@ class DataBunch():
 
     def __repr__(self):
         rep = ''
-        rep += 'train_ds: {} items\n'.format(len(self.train_ds))
-        rep += 'valid_ds: {} items\n'.format(len(self.valid_ds))
+        if self.train_ds:
+            rep += 'train_ds: {} items\n'.format(len(self.train_ds))
+        if self.valid_ds:
+            rep += 'valid_ds: {} items\n'.format(len(self.valid_ds))
+        if self.test_ds:
+            rep += 'test_ds: {} items\n'.format(len(self.test_ds))
         rep += 'label_names: ' + ','.join(self.label_names)
         return rep
 
@@ -69,9 +78,12 @@ class CocoDataset(Dataset):
                 box = ann['bbox']
                 label = ann['category_id']
                 box = torch.tensor(
-                    [[box[1], box[0], box[1] + box[3], box[0] + box[2]]])
+                    [[box[1], box[0], box[1] + box[3], box[0] + box[2]]]) ####
                 self.id2boxes[img_id].append(box)
                 self.id2labels[img_id].append(label)
+                
+        random.seed(1234)
+        random.shuffle(self.imgs)                
         self.id2boxes = dict([(id, torch.cat(boxes).float())
                               for id, boxes in self.id2boxes.items()])
         self.id2labels = dict([(id, torch.tensor(labels))
@@ -80,16 +92,20 @@ class CocoDataset(Dataset):
     def __getitem__(self, ind):
         img_fn = self.imgs[ind]
         img_id = self.img2id[img_fn]
-        img = Image.open(join(self.img_dir, img_fn))
-
-        if img_id in self.id2boxes:
-            boxes, labels = self.id2boxes[img_id], self.id2labels[img_id]
+        img = np.array(Image.open(join(self.img_dir, img_fn)))
+        boxes, labels = self.id2boxes[img_id], self.id2labels[img_id]
+        if self.transforms:
+            out = self.transforms(image=img, bboxes=boxes, labels=labels)
+            img = out['image']
+            boxes = torch.tensor(out['bboxes'])
+            labels = torch.tensor(out['labels'])
+        
+        if len(boxes) > 0:
+            x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
+            boxes = torch.cat([y, x, y+h, x+w], dim=1)
             boxlist = BoxList(boxes, labels=labels)
         else:
-            boxlist = BoxList(
-                torch.empty((0, 4)), labels=torch.empty((0, )).long())
-        if self.transforms:
-            return self.transforms(img, boxlist)
+            boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
         return (img, boxlist)
 
     def __len__(self):
