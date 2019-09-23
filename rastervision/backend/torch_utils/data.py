@@ -47,11 +47,6 @@ class DataBunch():
         return rep
 
 
-def collate_fn(data):
-    x = [d[0].unsqueeze(0) for d in data]
-    y = [d[1] for d in data]
-    return (torch.cat(x), y)
-
 
 class CocoDataset(Dataset):
     def __init__(self, img_dir, annotation_uris, transforms=None):
@@ -84,7 +79,8 @@ class CocoDataset(Dataset):
         random.shuffle(self.imgs)                
         self.id2boxes = dict([(id, torch.cat(boxes).float())
                               for id, boxes in self.id2boxes.items()])
-        self.id2labels = dict([(id, torch.tensor(labels))
+#        self.id2labels = dict([(id, torch.tensor(labels))
+        self.id2labels = dict([(id, labels)
                                for id, labels in self.id2labels.items()])
 
     def __getitem__(self, ind):
@@ -92,25 +88,27 @@ class CocoDataset(Dataset):
         img_id = self.img2id[img_fn]
         img = np.array(Image.open(join(self.img_dir, img_fn)))
         
-        boxes = []
-        labels = []
+        boxes = dict()
+        labels = dict()
         
         if img_id in self.id2boxes:
             boxes, labels = self.id2boxes[img_id], self.id2labels[img_id]
-        else:
-            boxes, labels = torch.empty((0, 4)), torch.empty((0, )).long()
+#        else:
+#            boxes, labels = torch.empty((0, 4)), torch.empty((0, )).long()
 #            boxlist = BoxList(
 #                torch.empty((0, 4)), labels=torch.empty((0, )).long())
         
         if self.transforms:
             out = self.transforms(image=img, bboxes=boxes, labels=labels)
             img = out['image']
-            boxes = torch.tensor(out['bboxes'])
-            labels = torch.tensor(out['labels'])
+#            boxes = torch.tensor(out['bboxes'])
+#            labels = torch.tensor(out['labels'])
+            boxes = out['bboxes']
+            labels = out['labels']
         
-        if len(boxes) > 0:
-            x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
-            boxes = torch.cat([y, x, y+h, x+w], dim=1)
+#        if len(boxes) > 0:
+#            x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
+#            boxes = torch.cat([y, x, y+h, x+w], dim=1)
 #            boxlist = BoxList(boxes, labels=labels)
 #        else:
 #            boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
