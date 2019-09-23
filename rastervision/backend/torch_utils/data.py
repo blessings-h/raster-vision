@@ -70,14 +70,14 @@ class CocoDataset(Dataset):
                 img_id = ann['image_id']
                 box = ann['bbox']
                 label = ann['category_id']
-                box = torch.tensor(
-                    [[box[1], box[0], box[1] + box[3], box[0] + box[2]]]) ####
+#                box = [box[1], box[0], box[1] + box[3], box[0] + box[2]] ####
                 self.id2boxes[img_id].append(box)
                 self.id2labels[img_id].append(label)
                 
         random.seed(1234)
-        random.shuffle(self.imgs)                
-        self.id2boxes = dict([(id, torch.cat(boxes).float())
+        random.shuffle(self.imgs)
+#        self.id2boxes = dict([(id, torch.cat(boxes).float())
+        self.id2boxes = dict([(id, boxes)
                               for id, boxes in self.id2boxes.items()])
 #        self.id2labels = dict([(id, torch.tensor(labels))
         self.id2labels = dict([(id, labels)
