@@ -98,8 +98,9 @@ class CocoDataset(Dataset):
         if img_id in self.id2boxes:
             boxes, labels = self.id2boxes[img_id], self.id2labels[img_id]
         else:
-            boxlist = BoxList(
-                torch.empty((0, 4)), labels=torch.empty((0, )).long())
+            boxes, labels = torch.empty((0, 4)), torch.empty((0, )).long()
+#            boxlist = BoxList(
+#                torch.empty((0, 4)), labels=torch.empty((0, )).long())
         
         if self.transforms:
             out = self.transforms(image=img, bboxes=boxes, labels=labels)
@@ -110,10 +111,11 @@ class CocoDataset(Dataset):
         if len(boxes) > 0:
             x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
             boxes = torch.cat([y, x, y+h, x+w], dim=1)
-            boxlist = BoxList(boxes, labels=labels)
-        else:
-            boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
-        return (img, boxlist)
+#            boxlist = BoxList(boxes, labels=labels)
+#        else:
+#            boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
+#        return (img, boxlist)
+        return (img, boxes, labels)
 
     def __len__(self):
         return len(self.imgs)
