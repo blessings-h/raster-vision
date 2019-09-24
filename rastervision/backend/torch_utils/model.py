@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision.models.detection.faster_rcnn import FasterRCNN
 from torchvision.models.detection.backbone_utils import BackboneWithFPN
-# from torchvision.models.detection.rpn import AnchorGenerator
+from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.models import resnet
 from torchvision.ops import misc as misc_nn_ops
 
@@ -59,13 +59,13 @@ class MyFasterRCNN(nn.Module):
         backbone = resnet_fpn_backbone(backbone_arch, pretrained)
         
         # Custom Anchors
-#        anchor_sizes = ((25,), (35,), (45,),)
-#        aspect_ratios = ((1.0),) * len(anchor_sizes)
-#        anchor_gen = AnchorGenerator(
-#            anchor_sizes, aspect_ratios
-#        )
+        anchor_sizes = ((25,), (35,), (45,))
+        aspect_ratios = ((0.8, 1.0, 1.2),) * len(anchor_sizes)
+        anchor_gen = AnchorGenerator(
+            anchor_sizes, aspect_ratios
+        )
         self.model = FasterRCNN(
-            backbone, num_labels, min_size=img_sz, max_size=img_sz)
+            backbone, num_labels, min_size=img_sz, max_size=img_sz, rpn_anchor_generator=anchor_gen)
         self.subloss_names = [
             'total_loss', 'loss_box_reg', 'loss_classifier', 'loss_objectness',
             'loss_rpn_box_reg'
