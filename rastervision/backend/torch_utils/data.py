@@ -47,21 +47,21 @@ class DataBunch():
         return rep
 
 def collate_fn(data):
-    img = [d[0].unsqueeze(0) for d in data]
-    boxes = [d[1] for d in data]
-    labels = [d[2] for d in data]
+    x = [d[0].unsqueeze(0) for d in data]
+    boxLists = [(torch.tensor(d[1]), torch.tensor(d[2])) for d in data]
+    y = []
     
-    if len(boxes) > 0:
-        boxes = torch.tensor(boxes)
-        labels = torch.tensor(labels)
-        
-        x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
-        boxes = torch.cat([y, x, y+h, x+w], dim=1)
-        boxlist = BoxList(boxes, labels=labels)
-    else:
-        boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
-    
-    return (torch.cat(img), boxList)
+    for item in boxLists:
+        if len(item[0]) > 0:
+            boxes = item[0]
+            labels = labels[1]
+            x_min, y_min, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
+            boxes = torch.cat([y_min, x_min, y_min+h, x_min+w], dim=1)
+            y.append(BoxList(boxes, labels=labels))
+        else:
+            y.append(BoxList(torch.empty((0, 4)), labels=torch.empty((0,))))
+
+    return (torch.cat(x), y)
 
 
 class CocoDataset(Dataset):
