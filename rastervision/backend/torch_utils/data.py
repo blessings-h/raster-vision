@@ -61,7 +61,7 @@ def collate_fn(data):
         else:
             y.append(BoxList(torch.empty((0, 4)).float(), labels=torch.empty((0,))))
 
-    return (torch.cat(x), y)
+    return (torch.cat(x).float(), y)
 
 
 class CocoDataset(Dataset):
