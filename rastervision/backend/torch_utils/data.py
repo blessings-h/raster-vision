@@ -52,11 +52,11 @@ def collate_fn(data):
     labels = [d[2] for d in data]
     
     if len(boxes) > 0:
-            x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
-            boxes = torch.cat([y, x, y+h, x+w], dim=1)
-            boxlist = BoxList(boxes, labels=labels)
-        else:
-            boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
+        x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
+        boxes = torch.cat([y, x, y+h, x+w], dim=1)
+        boxlist = BoxList(boxes, labels=labels)
+    else:
+        boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
     
     return (torch.cat(img), boxList)
 
