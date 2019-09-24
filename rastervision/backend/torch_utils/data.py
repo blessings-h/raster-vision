@@ -56,10 +56,10 @@ def collate_fn(data):
             boxes = item[0]
             labels = item[1]
             x_min, y_min, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
-            boxes = torch.cat([y_min, x_min, y_min+h, x_min+w], dim=1)
+            boxes = torch.cat([y_min, x_min, y_min+h, x_min+w], dim=1).float()
             y.append(BoxList(boxes, labels=labels))
         else:
-            y.append(BoxList(torch.empty((0, 4)), labels=torch.empty((0,))))
+            y.append(BoxList(torch.empty((0, 4)).float(), labels=torch.empty((0,))))
 
     return (torch.cat(x), y)
 
