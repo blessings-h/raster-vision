@@ -48,10 +48,13 @@ class DataBunch():
 
 def collate_fn(data):
     img = [d[0].unsqueeze(0) for d in data]
-    boxes = torch.tensor([d[1] for d in data])
-    labels = torch.tensor([d[2] for d in data])
+    boxes = [d[1] for d in data]
+    labels = [d[2] for d in data]
     
     if len(boxes) > 0:
+        boxes = torch.tensor(boxes)
+        labels = torch.tensor(labels)
+        
         x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
         boxes = torch.cat([y, x, y+h, x+w], dim=1)
         boxlist = BoxList(boxes, labels=labels)
