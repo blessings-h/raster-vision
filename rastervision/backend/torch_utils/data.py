@@ -46,6 +46,19 @@ class DataBunch():
         rep += 'label_names: ' + ','.join(self.label_names)
         return rep
 
+def collate_fn(data):
+    img = [d[0].unsqueeze(0) for d in data]
+    boxes = [d[1] for d in data]
+    labels = [d[2] for d in data]
+    
+    if len(boxes) > 0:
+            x, y, w, h = boxes[:, 0:1], boxes[:, 1:2], boxes[:, 2:3], boxes[:, 3:4]
+            boxes = torch.cat([y, x, y+h, x+w], dim=1)
+            boxlist = BoxList(boxes, labels=labels)
+        else:
+            boxlist = BoxList(torch.empty((0, 4)), labels=torch.empty((0,)))
+    
+    return (torch.cat(img), boxList)
 
 
 class CocoDataset(Dataset):
@@ -117,7 +130,8 @@ class CocoDataset(Dataset):
 
     def __len__(self):
         return len(self.imgs)
-
+    
+    
 
 def get_label_names(coco_path):
     categories = file_to_json(coco_path)['categories']
