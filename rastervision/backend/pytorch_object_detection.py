@@ -241,7 +241,8 @@ class PyTorchObjectDetection(Backend):
         opt = optim.Adam(model.parameters(), lr=lr)
         model_path = join(train_dir, 'model')
         log_path = join(train_dir, 'log.csv')
-        saved_models_path = join(train_dir, 'saved_models', 'saved_model')
+        saved_models_path = join(train_dir, 'saved_models')
+        os.mkdir(saved_models_path)
 
         # Load weights from a pretrained model.
         pretrained_uri = self.backend_opts.pretrained_uri
@@ -320,7 +321,7 @@ class PyTorchObjectDetection(Backend):
 
             # Save model and state.
             torch.save(model.state_dict(), model_path)
-            torch.save(model.state_dict(), '{}-epoch_{}'.format(saved_models_path, epoch)) 
+            torch.save(model.state_dict(), join(saved_models_path, 'epoch-{}'.format(epoch))) 
             train_state = {'epoch': epoch}
             json_to_file(train_state, train_state_path)
 
