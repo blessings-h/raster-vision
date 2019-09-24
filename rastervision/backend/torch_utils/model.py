@@ -117,7 +117,7 @@ class MyFasterRCNN(nn.Module):
                 'boxes': bl.boxes,
                 'labels': bl.get_field('labels')
             } for bl in _targets]
-            loss_dict = self.model(input, _targets)
+            loss_dict = self.model(input.float(), _targets.float())
             loss_dict['total_loss'] = sum(list(loss_dict.values()))
             return loss_dict
 
