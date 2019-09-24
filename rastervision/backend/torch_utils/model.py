@@ -98,14 +98,14 @@ class MyFasterRCNN(nn.Module):
                 h, w = x.shape[1:]
                 boxes = torch.cat(
                     [
-                        y.boxes,
-                        torch.tensor([[0., 0, h, w]], device=input.device)
+                        y.boxes.float(),
+                        torch.tensor([[0., 0, h, w]], device=input.device, dtype = torch.float32)
                     ],
                     dim=0)
                 labels = torch.cat(
                     [
-                        y.get_field('labels'),
-                        torch.tensor([0], device=input.device)
+                        y.get_field('labels').long(),
+                        torch.tensor([0], device=input.device, dtype = torch.int64)
                     ],
                     dim=0)
                 bl = BoxList(boxes, labels=labels)
