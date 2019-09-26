@@ -166,7 +166,7 @@ def build_databunch(data_dir, img_sz, batch_sz):
 
     label_names = get_label_names(train_anns[0])
     
-    aug_transforms = [ OneOf(
+    aug_transforms = [ OneOf([
             [ Posterize(p = 0.8), IAAAffine(translate_px=(10, 20), p=1.0),], 
             [ RandomCropNearBBox(p=0.2), IAASharpen(p=0.5),], 
             [ Rotate(p=0.6), Rotate(p=0.8),],  
@@ -181,8 +181,9 @@ def build_databunch(data_dir, img_sz, batch_sz):
             [ RandomContrast(p=0.0), IAAAffine(shear=60.0, p=0.8),], 
             [ RandomContrast(p=0.8), RandomContrast(p=0.2),], 
             [ Rotate(p=1.0), Cutout(p=1.0),], 
-            [ Solarize(p=0.8), Equalize(p=0.8),],          
-            p = 1.0)
+            [ Solarize(p=0.8), Equalize(p=0.8),],
+        ]
+        p = 1.0)
     ]
     transforms = [Resize(img_sz, img_sz), ToTensor()]
     aug_transforms.extend(transforms)
