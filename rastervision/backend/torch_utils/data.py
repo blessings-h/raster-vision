@@ -6,7 +6,6 @@ import glob
 from PIL import Image
 import torch
 import numpy as np
-import numpy.random.randint as randint
 from torch.utils.data import Dataset, DataLoader, Subset
 import torch.nn.functional as F
 import torchvision
