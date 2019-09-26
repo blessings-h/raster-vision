@@ -180,7 +180,7 @@ def build_databunch(data_dir, img_sz, batch_sz):
             [ RandomBrightness(p=1.0), IAAAffine(translate_px=(10, 20), p=1.0),], 
             [ RandomContrast(p=0.0), IAAAffine(shear=60.0, p=0.8),], 
             [ RandomContrast(p=0.8), RandomContrast(p=0.2),], 
-            [ Roatate(p=1.0), Cutout(p=1.0),], 
+            [ Rotate(p=1.0), Cutout(p=1.0),], 
             [ Solarize(p=0.8), Equalize(p=0.8),],          
             p = 1.0)
     ]
