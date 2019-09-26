@@ -167,9 +167,7 @@ def build_databunch(data_dir, img_sz, batch_sz):
 
     label_names = get_label_names(train_anns[0])
     
-    aug_transforms = [ OneOf(,
-        p = 1.0)
-    ]
+    # Augmentations
     policy_v3 = [
             [ Posterize(p = 0.8), IAAAffine(translate_px=(10, 20), p=1.0),], 
             [ RandomCropNearBBox(p=0.2), IAASharpen(p=0.5),], 
