@@ -191,7 +191,7 @@ def build_databunch(data_dir, img_sz, batch_sz):
     
     bbox_params = BboxParams(format='coco', min_area=0., min_visibility=0.2, label_fields=['labels'])
     aug_transforms = Compose(aug_transforms, bbox_params=bbox_params)
-    transforms = Compose(transforms, bbox_params=bbox_params)
+    standard_transforms = Compose(standard_transforms, bbox_params=bbox_params)
     
     train_ds = CocoDataset(train_dir, train_anns, transforms=aug_transforms)
     valid_ds = CocoDataset(valid_dir, valid_anns, transforms=standard_transforms)
