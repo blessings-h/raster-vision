@@ -6,6 +6,7 @@ import glob
 from PIL import Image
 import torch
 import numpy as np
+import numpy.random.randint as randint
 from torch.utils.data import Dataset, DataLoader, Subset
 import torch.nn.functional as F
 import torchvision
@@ -166,7 +167,10 @@ def build_databunch(data_dir, img_sz, batch_sz):
 
     label_names = get_label_names(train_anns[0])
     
-    aug_transforms = [ OneOf([
+    aug_transforms = [ OneOf(,
+        p = 1.0)
+    ]
+    policy_v3 = [
             [ Posterize(p = 0.8), IAAAffine(translate_px=(10, 20), p=1.0),], 
             [ RandomCropNearBBox(p=0.2), IAASharpen(p=0.5),], 
             [ Rotate(p=0.6), Rotate(p=0.8),],  
@@ -182,18 +186,18 @@ def build_databunch(data_dir, img_sz, batch_sz):
             [ RandomContrast(p=0.8), RandomContrast(p=0.2),], 
             [ Rotate(p=1.0), Cutout(p=1.0),], 
             [ Solarize(p=0.8), Equalize(p=0.8),],
-        ],
-        p = 1.0)
     ]
-    transforms = [Resize(img_sz, img_sz), ToTensor()]
-    aug_transforms.extend(transforms)
+    selected_subpolicy = int(np.random.randint(0, 15, 1))
+    aug_transforms = policy_v3[selected_subpolicy]
+    standard_transforms = [Resize(img_sz, img_sz), ToTensor()]
+    aug_transforms.extend(standard_transforms)
     
     bbox_params = BboxParams(format='coco', min_area=0., min_visibility=0.2, label_fields=['labels'])
     aug_transforms = Compose(aug_transforms, bbox_params=bbox_params)
     transforms = Compose(transforms, bbox_params=bbox_params)
     
     train_ds = CocoDataset(train_dir, train_anns, transforms=aug_transforms)
-    valid_ds = CocoDataset(valid_dir, valid_anns, transforms=transforms)
+    valid_ds = CocoDataset(valid_dir, valid_anns, transforms=standard_transforms)
     train_ds.label_names = label_names
     valid_ds.label_names = label_names
 
