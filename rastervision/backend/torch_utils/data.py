@@ -13,15 +13,24 @@ import cv2
 
 from rastervision.utils.files import (file_to_json)
 from rastervision.backend.torch_utils.boxlist import BoxList
-from albumentations.pytorch import ToTensor
 
 from albumentations import (
+    Posterize,
+    IAAAffine,
+    RandomCropNearBBox,
+    IAASharpen,
     HorizontalFlip,
     Equalize,
-    ShiftScaleRotate, 
+    Rotate, 
     RandomContrast,
-    Compose,
+    Solarize,
+    IAASharpen,
+    ToGray,
+    Cutout,
+    RandomBrightness,
     Resize,
+    Compose,
+    OneOf,
     BboxParams
 )
 
@@ -161,6 +170,28 @@ def build_databunch(data_dir, img_sz, batch_sz):
                       Equalize(p=0.8),
                       RandomContrast()
                      ]
+
+    
+    aug_transforms = [ OneOf(
+            [ Posterize(p = 0.8), IAAAffine(translate_px={"x": 10, "y": 0}, p=1.0),], 
+            [ RandomCropNearBBox(p=0.2), IAASharpen(p=0.5),], 
+            [ Rotate(p=0.6), Rotate(p=0.8),],  
+            [ Equalize(p=0.8), RandomContrast(p=0.2),], 
+            [ Solarize(p=0.2), IAAAffine(translate_px={"x": 0, "y": 10}, p=0.2),], 
+            [ IAASharpen(p=0.0), ToGray(p=0.4),], 
+            [ Equalize(p=1.0), IAAAffine(translate_px={"x": 0, "y": 10}, p=0.2),], 
+            [ Posterize(p=0.8), Rotate(p=0.0),], 
+            [ RandomContrast(p=0.6), Rotate(p=1.0),], 
+            [ Equalize(p=0.0), Cutout(p=0.8),], 
+            [ RandomBrightness(p=1.0), IAAAffine(translate_px={"x": 0, "y": 10}, p=0.2),], 
+            [ RandomContrast(p=0.0), IAAAffine(shear=60.0, p=0.8),], 
+            [ RandomContrast(p=0.8), RandomContrast(p=0.2),], 
+            [ Roatate(p=1.0), Cutout(p=1.0),], 
+            [ Solarize(p=0.8), Equalize(p=0.8),],          
+            p = 1.0)
+    ]            
+    
+    
     transforms = [Resize(img_sz, img_sz), ToTensor()]
     aug_transforms.extend(transforms)
     
