@@ -59,7 +59,7 @@ class MyFasterRCNN(nn.Module):
         backbone = resnet_fpn_backbone(backbone_arch, pretrained)
         
         # Custom Anchors
-        anchor_sizes = ((20,), (30,), (40,), (50,), (60,))
+        anchor_sizes = ((10,), (20,), (30,), (40,), (50,))
         aspect_ratios = ((0.8, 1.0, 1.2),) * len(anchor_sizes)
         anchor_gen = AnchorGenerator(
             anchor_sizes, aspect_ratios
