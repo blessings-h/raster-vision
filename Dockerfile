@@ -27,7 +27,7 @@ RUN wget -O /tmp/protoc3.zip https://github.com/google/protobuf/releases/downloa
     rm /tmp/protoc3.zip
 
 # Install Python 3.6
-RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
+RUN curl -L -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
      chmod +x ~/miniconda.sh && \
      ~/miniconda.sh -b -p /opt/conda && \
      rm ~/miniconda.sh
